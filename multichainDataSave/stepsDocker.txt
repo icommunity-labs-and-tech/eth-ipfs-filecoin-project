@@ -1,0 +1,18 @@
+1. Crear la imagen
+
+docker build -t icommunity-besu/api .
+
+
+2. Extraer la imagen en formato .tar
+
+docker save icommunity-besu/api > icommunity-besu-api.tar
+
+
+3. Subir la imagen a la maquina deseada
+
+docker load < icommunity-besu-api.tar
+
+
+4. Levantar el servicio
+
+docker run --publish 10010:10010 --detach --name icommunitybesu icommunity-besu/api:latest

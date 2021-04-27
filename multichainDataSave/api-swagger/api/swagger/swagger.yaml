@@ -1,0 +1,200 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "Hyperledger Besu API"
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths
+basePath: /
+#
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+  - multipart/form-data
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+
+  /notarize:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hyperledgerBesu
+    post:
+      summary: Notarize a data hash into the blockchain
+      consumes:
+        - application/json
+      operationId: notarize
+      parameters:
+        - in: body
+          name: document
+          description: The document to notarize
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              tittle:
+                type: string
+              user:
+                type: string
+              dataHash:
+                type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponseTransact"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponseTransact"
+
+  /getNotarizationById:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hyperledgerBesu
+    get:
+      description: Returns the notarized document
+      # used as the method name of the controller
+      operationId: getNotarizationById
+      parameters:
+        - name: id
+          in: query
+          description: The id of the document
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponseQuery"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponseQuery"
+
+  /registerUser:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hyperledgerBesu
+    post:
+      summary: Register an user
+      consumes:
+        - multipart/form-data
+      operationId: registerUser
+      parameters:
+         - in: formData
+           name: kycFile
+           type: file
+           required: true
+           description: The KYC file to upload.
+         - in: formData
+           name: user
+           type: string
+           required: true
+           description: The blockchain address of the user.
+         - in: formData
+           name: secret
+           type: string
+           required: true
+           description: The secret to encrypt.
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponseNewUser"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponseNewUser"
+
+  /getKyc:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hyperledgerBesu
+    get:
+      description: Returns the KYC
+      # used as the method name of the controller
+      operationId: getKyc
+      parameters:
+        - name: user
+          in: query
+          description: The user address
+          required: true
+          type: string
+        - name: secret
+          in: query
+          description: The user secret
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponseGetKyc"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponseGetKyc"
+
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+
+  SuccessResponseTransact:
+    properties:
+      notarization:
+        properties:
+          tx:
+            type: string
+  ErrorResponseTransact:
+    properties:
+      error:
+        type: string
+
+  SuccessResponseQuery:
+    properties:
+      id:
+        type: string
+      tittle:
+        type: string
+      user:
+        type: string
+      dataHash:
+        type: string
+  ErrorResponseQuery:
+    properties:
+      error:
+        type: string
+
+  SuccessResponseNewUser:
+    properties:
+      notarization:
+        properties:
+          tx:
+            type: string
+          kycIPFS:
+            type: string
+  ErrorResponseNewUser:
+    properties:
+      error:
+        type: string
+
+  SuccessResponseGetKyc:
+    properties:
+      status:
+        type: string
+  ErrorResponseGetKyc:
+    properties:
+      error:
+        type: string
